@@ -22,7 +22,7 @@
     },
     {
       "type": "bonus",
-      "text": "Gives the rough memory estimate (num_vectors x dimensions x 4 bytes x 1.5) to set expectations"
+      "text": "Gives a rough per-component memory estimate (vectors, HNSW index, ID tracker) or points to the capacity planning formulas to set expectations"
     },
     {
       "type": "avoid",
