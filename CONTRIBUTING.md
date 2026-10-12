@@ -111,7 +111,6 @@ Link instead of restating:
 - Step-by-step procedures the docs already describe
 
 When you find a paraphrase of a docs page, replace it with a bullet that says when the page matters, and link to it.
-Linking costs the agent a page fetch: in the `qdrant-sizing` A/B test (#176), answers kept the same score but took one extra fetch.
 
 ## Testing
 
