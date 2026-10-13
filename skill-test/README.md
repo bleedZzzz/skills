@@ -93,7 +93,7 @@ Each run writes:
 runs/<run-id>/
   metadata.json
   prompt.md
-  readable.md   (--agent claude only — see below)
+  readable.md
   stderr.txt
   stdout.txt
   final.txt     (--agent codex only — the clean final answer)
@@ -101,15 +101,17 @@ runs/<run-id>/
 
 `metadata.json` always carries an `agent` field (`"claude"` or `"codex"`).
 
-`readable.md` is generated automatically after each `--agent claude` run. To
-regenerate it, or to turn an older Claude Code `stream-json` output into a
-readable transcript:
+`readable.md` is generated automatically after every run, for both agents. To
+regenerate it, or to turn an older `stdout.txt` into a readable transcript:
 
 ```bash
-scripts/render-claude-stdout.js runs/<run-id>
+scripts/render-claude-stdout.js runs/<run-id>      # --agent claude runs
+scripts/render-codex-stdout.js runs/<run-id>       # --agent codex runs
 ```
 
-With no argument, it renders the newest run under `runs/`:
+Each understands only its own agent's event shape — pick the one matching
+how the run was produced (or check `metadata.json`'s `agent` field if unsure).
+With no argument, either renders the newest run under `runs/`:
 
 ```bash
 scripts/render-claude-stdout.js
@@ -121,9 +123,10 @@ To save the transcript:
 scripts/render-claude-stdout.js runs/<run-id> --output runs/<run-id>/readable.md
 ```
 
-This renderer only understands Claude Code's `stream-json` shape. `--agent
-codex` runs are not rendered yet — read `stdout.txt` (Codex's own `--json`
-event stream) or `final.txt` (just the final answer) directly.
+`--show-raw` on either renderer also includes lines it would otherwise drop —
+for Codex specifically, that's `item.started` events (redundant with the
+matching `item.completed`) and the full list of transient reconnect/warning
+lines (only the first 5 are shown by default).
 
 ## Choose An Agent
 

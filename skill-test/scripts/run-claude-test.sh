@@ -604,12 +604,14 @@ if [[ -n "$TEST_PROMPT_JSON" && -d "$run_dir" ]]; then
   cp "$TEST_PROMPT_JSON" "$run_dir/test-prompt.json"
 fi
 
-if [[ "$RENDER_TRANSCRIPT" == "1" && "$AGENT" == "codex" ]]; then
-  echo "Note: readable-transcript rendering isn't implemented yet for --agent codex." >&2
-  echo "      See $run_dir/stdout.txt (event stream) or $run_dir/final.txt (final answer)." >&2
-elif [[ "$RENDER_TRANSCRIPT" == "1" && -f "$run_dir/stdout.txt" ]]; then
+if [[ "$RENDER_TRANSCRIPT" == "1" && -f "$run_dir/stdout.txt" ]]; then
+  if [[ "$AGENT" == "codex" ]]; then
+    renderer="$SCRIPT_DIR/render-codex-stdout.js"
+  else
+    renderer="$SCRIPT_DIR/render-claude-stdout.js"
+  fi
   transcript_path="$run_dir/readable.md"
-  if "$SCRIPT_DIR/render-claude-stdout.js" "$run_dir" --output "$transcript_path"; then
+  if "$renderer" "$run_dir" --output "$transcript_path"; then
     echo "Readable transcript: $transcript_path"
   else
     echo "Warning: failed to render readable transcript for $run_dir" >&2
