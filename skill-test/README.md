@@ -1,4 +1,4 @@
-# Claude Code Skill Test Harness
+# Agent Skill Test Harness
 
 This repo runs an agent CLI — Claude Code or Codex — inside a fresh Docker
 container for each prompt, captures the answer, and avoids reusing local
@@ -157,7 +157,7 @@ changes a few things:
 ## Run A JSON Test-Prompt
 
 The prompt file may also be a JSON test-prompt (for example the files under
-`skills/evals/test-prompts/`) that carries the prompt plus scoring metadata:
+`../evals/test-prompts/`) that carries the prompt plus scoring metadata:
 
 ```json
 {
@@ -413,6 +413,12 @@ wrong, or if `codex -h` lists something this menu doesn't.
 
 Claude-only for now — `scripts/scoring/` doesn't know about `--agent` yet.
 
+Unlike the rest of this README, the commands in this section run from the
+**repo root**, not from `skill-test/` — `scripts/scoring/` lives there, not
+under `skill-test/`. (The `../SCORING.md` link just below is still relative
+to *this file's* location, same as any Markdown link — that's independent of
+where the commands run.)
+
 `scripts/scoring/` carries the same periodic (monthly) scoring harness described in
 [`SCORING.md`](../SCORING.md) (`run-eval-matrix.sh` → `extract-run-signals.sh` →
 `judge-runs.sh`). That pipeline measures **lift** — a skill installed vs not —
@@ -429,7 +435,7 @@ scored against the same prompts.
 Point `--skills-root` at a checkout of each version and score only the
 prompt(s) that exercise the skill under test (via `--prompts-dir`, pointed at
 a directory containing just those `*.json` files — copy the relevant ones out
-of `../evals/test-prompts/` for this):
+of `evals/test-prompts/` for this):
 
 ```bash
 # Version A — e.g. the skill as it stands on main

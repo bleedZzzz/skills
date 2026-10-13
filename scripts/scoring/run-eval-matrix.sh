@@ -194,6 +194,13 @@ run_one() {
   leaf="${resolved#*$'\t'}"
 
   local args=(
+    # Explicit, not just the harness's own default: this matrix only knows
+    # how to drive and parse Claude Code output. If SKILL_TEST_AGENT=codex
+    # happened to be set in the caller's shell, an implicit default would
+    # silently send Claude model names to `codex -m` and build a scorecard
+    # from parsers that can't read Codex's event shape -- wrong results with
+    # no visible failure, rather than this being a hard requirement.
+    --agent claude
     --model "$model"
     --permission-mode "$PERMISSION_MODE"
     --max-turns "$MAX_TURNS"
