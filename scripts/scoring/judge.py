@@ -65,16 +65,21 @@ def score_item(item_type: str, verdict: str) -> tuple[float, float, bool]:
 
 
 def _run_agent(run_dir: Path) -> str:
-    """Read metadata.json's "agent" field. Defaults to "claude" if absent —
-    covers both pre-multi-agent runs (no field at all) and a missing/corrupt
-    metadata.json, so old captured runs keep grading exactly as before."""
+    """Read metadata.json's "agent" field. Defaults to "claude" if absent --
+    covers pre-multi-agent runs (no field at all), a missing/corrupt
+    metadata.json, and a metadata.json that parses but isn't a JSON object
+    (e.g. "[]") -- so old or malformed captured runs keep grading exactly as
+    before instead of raising."""
     md = run_dir / "metadata.json"
     if not md.exists():
         return "claude"
     try:
-        return json.loads(md.read_text()).get("agent") or "claude"
+        data = json.loads(md.read_text())
     except json.JSONDecodeError:
         return "claude"
+    if not isinstance(data, dict):
+        return "claude"
+    return data.get("agent") or "claude"
 
 
 def extract_final_answer(run_dir: Path) -> str:

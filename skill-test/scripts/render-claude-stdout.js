@@ -368,6 +368,12 @@ function renderPlainText(raw, lines) {
 function renderTranscript(stdoutPath, options) {
   const runDir = path.dirname(stdoutPath);
   const metadata = readJsonIfExists(path.join(runDir, "metadata.json"));
+  if (metadata && metadata.agent && metadata.agent !== "claude") {
+    fail(
+      `${runDir} is a "${metadata.agent}" run (per metadata.json), not claude. ` +
+        `Use scripts/render-codex-stdout.js instead.`
+    );
+  }
   const prompt = fs.existsSync(path.join(runDir, "prompt.md"))
     ? fs.readFileSync(path.join(runDir, "prompt.md"), "utf8").trim()
     : "";

@@ -178,6 +178,11 @@ set -e
 finished_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 timed_out=0
 [[ -n "$CODEX_TIMEOUT_SECS" && "$status" -eq 124 ]] && timed_out=1
+# A timed-out run's final.txt may be missing, in which case judge.py's
+# Codex fallback grades the last partial agent_message as if it were a real
+# answer. Fine for now (single-run testing), but when the periodic matrix
+# gains --agent codex, exclude metadata.timed_out=1 runs from scoring the
+# same way budget-capped Claude runs already are (see SCORING.md).
 
 jq -n \
   --arg agent "codex" \

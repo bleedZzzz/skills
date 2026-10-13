@@ -5,8 +5,10 @@ container for each prompt, captures the answer, and avoids reusing local
 agent state between tests. Claude Code is the default; pass `--agent codex`
 to any `run-claude-test.sh` command to use Codex instead (see "Choose An
 Agent" below). Everything in this README defaults to Claude Code unless a
-section says otherwise — the periodic scoring pipeline (`scripts/scoring/`,
-`SCORING.md`) in particular is Claude-only for now.
+section says otherwise. The periodic scoring pipeline (`scripts/scoring/`,
+`SCORING.md`) is partway there: `judge.py` can grade a Codex run, but the
+matrix runner (`run-eval-matrix.sh`) and signal extraction
+(`extract-run-signals.sh`) are still Claude-only.
 
 ## Why This Is Fresh
 
@@ -73,7 +75,9 @@ then set `OPENAI_API_KEY` (or `CODEX_API_KEY`) in `.env` the same way. Codex's
 `exec` doesn't read the key directly — the container runs `codex login
 --with-api-key` from it before the actual test, which is why a Codex auth
 failure shows up as a `401 Unauthorized` in `stdout.txt` rather than the
-`Not logged in` message Claude Code prints.
+`Not logged in` message Claude Code prints. An access token works too: set
+`CODEX_ACCESS_TOKEN` instead, and the container logs in with
+`codex login --with-access-token`.
 
 ## Run A Smoke Test
 
@@ -109,9 +113,11 @@ scripts/render-claude-stdout.js runs/<run-id>      # --agent claude runs
 scripts/render-codex-stdout.js runs/<run-id>       # --agent codex runs
 ```
 
-Each understands only its own agent's event shape — pick the one matching
-how the run was produced (or check `metadata.json`'s `agent` field if unsure).
-With no argument, either renders the newest run under `runs/`:
+Each understands only its own agent's event shape, and refuses to run (with a
+pointer to the other script) if `metadata.json`'s `agent` field doesn't
+match — so pointing the wrong renderer at a run fails loudly instead of
+silently printing an empty-looking transcript. With no argument, either
+renders the newest run under `runs/`, whichever agent produced it:
 
 ```bash
 scripts/render-claude-stdout.js

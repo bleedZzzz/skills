@@ -10,24 +10,40 @@ const repoRoot = path.resolve(__dirname, "..");
 // alongside stdout.txt) so the two renderers are interchangeable from a
 // caller's point of view — only the event shapes being parsed differ.
 //
-// Event shapes handled below (confirmed empirically against codex-cli
-// 0.160.1's `exec --json` output, not from docs):
+// Event shapes handled below. codex-cli 0.160.1's `exec --json` emits seven
+// item types (confirmed by inspecting the pinned binary's strings):
+// agent_message, reasoning, command_execution, file_change, mcp_tool_call,
+// web_search, todo_list -- plus a top-level item.updated event. Of those,
+// this file has a precise, field-by-field renderer only for the ones
+// actually triggered live and inspected:
 //   {"type":"thread.started","thread_id":"..."}
 //   {"type":"turn.started"}
 //   {"type":"item.completed","item":{"id":...,"type":"agent_message","text":"..."}}
 //   {"type":"item.completed","item":{"id":...,"type":"command_execution",
 //     "command":"...","aggregated_output":"...","exit_code":0,"status":"completed"}}
+//   {"type":"item.completed","item":{"id":...,"type":"web_search",
+//     "query":"...","action":{"type":"search","query":"..."}}}
+//   {"type":"item.completed","item":{"id":...,"type":"file_change",
+//     "changes":[{"path":"...","kind":"add"|"update"|"delete"}],"status":"completed"}}
 //   {"type":"item.completed","item":{"id":...,"type":"error","message":"..."}}
 //   {"type":"turn.completed","usage":{"input_tokens":...,"cached_input_tokens":...,
 //     "cache_write_input_tokens":...,"output_tokens":...,"reasoning_output_tokens":...}}
 //   {"type":"turn.failed","error":{"message":"..."}}
 //   {"type":"error","message":"..."}   (transient reconnect/warning lines)
-// `item.started` is intentionally not rendered on its own: the matching
-// `item.completed` for the same item carries everything (including the
-// command itself), so showing both would just duplicate the command line.
-// An item that starts but never reaches item.completed (a genuine crash) is
-// still visible via the run's overall exit code / turn.failed, and in full
-// under --show-raw.
+// `reasoning`, `mcp_tool_call`, and `todo_list` were not reachable in a
+// handful of live `exec` attempts (no MCP server configured for the first,
+// and the model reported the plan/update_plan tool as unavailable for the
+// third; `reasoning` may need a specific model/reasoning-effort config not
+// tried here). Rather than guess field names for those, renderGenericItem
+// below dumps every field it finds, by default (not gated behind a flag) --
+// nothing from an unmodeled item type is silently dropped, even though it
+// isn't formatted as nicely as the five above.
+// `item.started`/`item.updated` are intentionally not rendered on their
+// own: the matching `item.completed` for the same item carries the final
+// state (including, for command_execution, the command itself), so showing
+// both would just duplicate it. An item that starts but never reaches
+// item.completed (a genuine crash) is still visible via the run's overall
+// exit code / turn.failed, and in full under --show-raw.
 
 function usage() {
   console.log(`Usage: scripts/render-codex-stdout.js [RUN_DIR|STDOUT_FILE] [options]
@@ -42,9 +58,9 @@ Arguments:
 Options:
   --output FILE              Write transcript to FILE instead of stdout.
   --show-tool-json           Include full item JSON for command executions.
-  --show-raw                 Include unparsable raw lines, item.started
-                              events, and transient top-level error/warning
-                              lines (reconnect messages etc).
+  --show-raw                 Include unparsable raw lines, item.started/
+                              item.updated events, and transient top-level
+                              error/warning lines (reconnect messages etc).
   -h, --help                 Show this help.
 
 Examples:
@@ -233,16 +249,62 @@ function renderItemError(item, lines) {
   lines.push(`- Message: ${oneLine(item.message)}`);
 }
 
-function renderUnknownItem(item, lines, options) {
+function renderWebSearch(item, lines) {
   lines.push("");
-  lines.push(`## Item: ${item.type || "unknown"}`);
+  lines.push("## Web Search");
   if (item.id) {
     lines.push(`- ID: ${item.id}`);
   }
-  if (options.showToolJson || options.showRaw) {
+  const query = item.query || (item.action && item.action.query) || "";
+  lines.push(`- Query: ${oneLine(query) || "(empty)"}`);
+}
+
+function renderFileChange(item, lines) {
+  lines.push("");
+  lines.push("## File Change");
+  if (item.id) {
+    lines.push(`- ID: ${item.id}`);
+  }
+  if (item.status) {
+    lines.push(`- Status: ${item.status}`);
+  }
+  const changes = Array.isArray(item.changes) ? item.changes : [];
+  for (const change of changes) {
+    if (change && typeof change === "object") {
+      lines.push(`- ${change.kind || "change"}: ${change.path || "unknown path"}`);
+    }
+  }
+}
+
+// Headings for item types whose exact field layout isn't confirmed live
+// (see the file header comment) -- used only to make the generic dump below
+// a little more readable than a bare type string.
+const GENERIC_ITEM_HEADINGS = {
+  reasoning: "Reasoning",
+  mcp_tool_call: "MCP Tool Call",
+  todo_list: "Todo List",
+};
+
+function renderGenericItem(item, lines) {
+  const heading = GENERIC_ITEM_HEADINGS[item.type] || item.type || "unknown";
+  lines.push("");
+  lines.push(`## ${heading}`);
+  if (item.id) {
+    lines.push(`- ID: ${item.id}`);
+  }
+  // Unconfirmed schema: dump every other field rather than guess names and
+  // risk silently hiding content (always shown, not gated behind a flag).
+  const rest = {};
+  for (const [key, value] of Object.entries(item)) {
+    if (key === "id" || key === "type") {
+      continue;
+    }
+    rest[key] = value;
+  }
+  if (Object.keys(rest).length > 0) {
     lines.push("");
     lines.push("```json");
-    lines.push(prettyJson(item));
+    lines.push(prettyJson(rest));
     lines.push("```");
   }
 }
@@ -257,10 +319,14 @@ function renderItemCompleted(event, lines, options) {
     renderAgentMessage(item, lines);
   } else if (item.type === "command_execution") {
     renderCommandExecution(item, lines, options);
+  } else if (item.type === "web_search") {
+    renderWebSearch(item, lines);
+  } else if (item.type === "file_change") {
+    renderFileChange(item, lines);
   } else if (item.type === "error") {
     renderItemError(item, lines);
   } else {
-    renderUnknownItem(item, lines, options);
+    renderGenericItem(item, lines);
   }
 }
 
@@ -316,6 +382,12 @@ function renderPlainText(raw, lines) {
 function renderTranscript(stdoutPath, options) {
   const runDir = path.dirname(stdoutPath);
   const metadata = readJsonIfExists(path.join(runDir, "metadata.json"));
+  if (metadata && metadata.agent && metadata.agent !== "codex") {
+    fail(
+      `${runDir} is a "${metadata.agent}" run (per metadata.json), not codex. ` +
+        `Use scripts/render-claude-stdout.js instead.`
+    );
+  }
   const prompt = fs.existsSync(path.join(runDir, "prompt.md"))
     ? fs.readFileSync(path.join(runDir, "prompt.md"), "utf8").trim()
     : "";
@@ -362,10 +434,13 @@ function renderTranscript(stdoutPath, options) {
 
     if (event.type === "item.completed") {
       renderItemCompleted(event, lines, options);
-    } else if (event.type === "item.started") {
+    } else if (event.type === "item.started" || event.type === "item.updated") {
+      // Both are deduplicated against the matching item.completed by
+      // default -- see the file header comment.
       if (options.showRaw) {
+        const label = event.type === "item.started" ? "Item Started" : "Item Updated";
         lines.push("");
-        lines.push(`## Item Started: ${(event.item && event.item.type) || "unknown"}`);
+        lines.push(`## ${label}: ${(event.item && event.item.type) || "unknown"}`);
         lines.push("");
         lines.push("```json");
         lines.push(prettyJson(event.item));
