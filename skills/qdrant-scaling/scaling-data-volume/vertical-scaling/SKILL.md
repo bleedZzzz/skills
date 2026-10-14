@@ -23,11 +23,7 @@ Use when: current node resources (RAM, CPU, disk) are insufficient, but the work
 
 ## How to Scale Vertically in Qdrant Cloud
 
-Vertical scaling is managed through the Qdrant Cloud Console.
-
-- Log into [Qdrant Cloud Console](https://cloud.qdrant.io/) or use [CLI tool](https://github.com/qdrant/qcloud-cli)
-- Select the cluster to resize
-- Choose a larger node configuration (more RAM, CPU, or both)
+- Resize in the [Qdrant Cloud Console](https://cloud.qdrant.io/) or with the [CLI tool](https://github.com/qdrant/qcloud-cli). Every node in the cluster is scaled to the same size [Vertical scaling](https://skills.qdrant.tech/md/documentation/cloud/cluster-scaling/?s=vertical-scaling)
 - The upgrade process involves a rolling restart with no downtime if replication is configured
 - Ensure `replication_factor: 2` or higher before resizing to maintain availability during the rolling restart
 
@@ -35,8 +31,6 @@ Vertical scaling is managed through the Qdrant Cloud Console.
 
 
 ## RAM Sizing Guidelines
-
-RAM is the most critical resource for Qdrant performance. Use these guidelines to right-size.
 
 - Estimate RAM per component (vectors, HNSW index, ID tracker, payload indexes) for the structures you keep in RAM, using the formulas in [Capacity planning](https://skills.qdrant.tech/md/documentation/capacity-planning/?s=calculating-ram-and-disk-size). For a full sizing walkthrough, see [qdrant-sizing](../../../qdrant-sizing/SKILL.md)
 - Quantization adds a compressed copy alongside the original vectors. RAM for vectors drops only when the originals move to disk (`memory: cold`) and the quantized copy stays in RAM. With scalar quantization, the copy is 1/4 the size (INT8 reduces each float32 to 1 byte) [Quantization](https://skills.qdrant.tech/md/documentation/manage-data/quantization/)

@@ -19,9 +19,9 @@ High throughput favors fewer, larger segments so each query touches less overhea
 
 ## Minimize impact of Update Workloads
 
-- Configure update throughput control (v1.17+) to prevent unoptimized searches degrading reads [Low latency search](https://skills.qdrant.tech/md/documentation/search/low-latency-search/)
+- Keep searches off unindexed data during heavy writes: the `indexed_only` search parameter, or the experimental `prevent_unoptimized` optimizer setting (v1.17.1+) [Query indexed data only](https://skills.qdrant.tech/md/documentation/search/low-latency-search/?s=query-indexed-data-only)
 - Set `optimizer_cpu_budget` to limit indexing CPUs (e.g. `2` on an 8-CPU node reserves 6 for queries)
-- Configure delayed read fan-out (v1.17+) for tail latency [Delayed fan-outs](https://skills.qdrant.tech/md/documentation/search/low-latency-search/?s=use-delayed-fan-outs)
+- Delayed read fan-outs (v1.17+) cut tail latency by sending extra reads to other replicas, which adds read load; leave them off when throughput is the priority [Delayed fan-outs](https://skills.qdrant.tech/md/documentation/search/low-latency-search/?s=use-delayed-fan-outs)
 
 
 
@@ -31,7 +31,7 @@ If a single node is saturated on CPU after applying the tuning above, scale hori
 
 - Shard replicas serve queries from replicated shards, distributing read load across nodes
 - Each replica adds independent query capacity without re-sharding
-- Use `replication_factor: 2+` and route reads to replicas [Distributed deployment](https://skills.qdrant.tech/md/documentation/scaling/distributed_deployment/?s=replication)
+- Use `replication_factor: 2+` and send requests through a load balancer across all nodes; if every request hits one node, its local replicas serve the query and the other replicas sit idle [Deploy behind a load balancer](https://skills.qdrant.tech/md/documentation/scaling/distributed_deployment/?s=deploy-behind-a-load-balancer)
 
 See also [Horizontal Scaling](../scaling-data-volume/horizontal-scaling/SKILL.md) for general horizontal scaling guidance.
 
@@ -42,9 +42,9 @@ If it is not possible to keep all vectors in RAM, disk I/O can become the bottle
 In this case:
 
 - Upgrade to provisioned IOPS or local NVMe first. See impact of disk performance to vector search in [Disk performance article](https://skills.qdrant.tech/md/articles/memory-consumption/)
-- Use `io_uring` on Linux (kernel 5.11+) [io_uring article](https://skills.qdrant.tech/md/articles/io_uring/)
+- Enable async I/O: `storage.performance.io_uring: auto` on Qdrant 1.19 or newer, `async_scorer: true` on 1.18 or older. Requires Linux with a kernel that supports `io_uring` [Async I/O](https://skills.qdrant.tech/md/documentation/ops-configuration/memory-tiers/?s=async-io)
 - In case of quantized vectors, prefer global rescoring over per-segment rescoring to reduce disk reads. Example in the [tutorial](https://skills.qdrant.tech/md/documentation/tutorials-operations/large-scale-search/?s=search-query)
-- Configure higher number of search threads to parallelize disk reads. Default is `cpu_count - 1`, which is optimal for RAM-based search but may be too low for disk-based search. See [configuration reference](https://skills.qdrant.tech/md/documentation/ops-configuration/configuration/?s=configuration-options)
+- Raise `max_search_threads` to parallelize disk reads. The default (`0`, automatic) suits RAM-based search but may be too low for disk-based search. See [configuration reference](https://skills.qdrant.tech/md/documentation/ops-configuration/configuration/?s=configuration-options)
 - If still saturated, scale out horizontally (each node adds independent IOPS)
 
 
