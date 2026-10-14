@@ -30,7 +30,7 @@ Most likely you need a sparse vector for exact text search alongside the dense o
 
 What to remember when using sparse vectors for lexical search:
 - tokenization and stemming affect exact matches, especially on custom codes, terms, etc.
-- IDF statistics are computed over the whole shard by default, which distorts scoring in multi-tenant collections where tenants have different vocabularies. On Qdrant 1.19 or newer, you can compute them per tenant instead. See [Per-tenant IDF statistics](https://skills.qdrant.tech/md/documentation/manage-data/multitenancy/?s=per-tenant-idf-statistics).
+- On Qdrant 1.18 and older, IDF statistics are computed over the whole shard, which distorts scoring in multi-tenant collections where tenants have different vocabularies. On 1.19 or newer, scope them to one tenant with the `idf` search parameter, and index the tenant field. See [Per-tenant IDF statistics](https://skills.qdrant.tech/md/documentation/manage-data/multitenancy/?s=per-tenant-idf-statistics).
 
 What to remember when using Qdrant BM25 and miniCOIL (based on BM25):
 - Calibrate `avg_len` per field: Qdrant doesn't compute it, and the default assumes document-length text, so short fields (titles, tags) need a much smaller value or BM25 overweights term frequency [BM25](https://skills.qdrant.tech/md/documentation/search/text-search/full-text-search/?s=bm25).
