@@ -10,7 +10,7 @@
     },
     {
       "type": "must",
-      "text": "Estimates RAM via the formula num_vectors x dimensions x 4 bytes x 1.5 (applied to 60M x 768-d)"
+      "text": "Estimates RAM per component for 60M x 768-d (vectors, HNSW index, ID tracker, payload indexes) for the structures kept in RAM, rather than a single blended multiplier"
     },
     {
       "type": "must",
@@ -18,7 +18,7 @@
     },
     {
       "type": "bonus",
-      "text": "Offers quantization (scalar /4, binary /32) to cut the RAM requirement"
+      "text": "Offers quantization to cut the RAM requirement, noting that the quantized copy (1/4 the size for scalar, 1/32 for binary) is stored alongside the originals and RAM only drops when the original vectors move to disk"
     },
     {
       "type": "bonus",
