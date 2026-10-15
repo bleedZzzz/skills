@@ -22,7 +22,7 @@
     },
     {
       "type": "bonus",
-      "text": "Mentions the qdrant-relevance-feedback Python library for training/calibration (train on ~50-200 real queries)"
+      "text": "Mentions the qdrant-relevance-feedback Python library for training/calibration (train on ~50-300 representative queries, real ones preferred)"
     },
     {
       "type": "bonus",
