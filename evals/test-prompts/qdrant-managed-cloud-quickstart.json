@@ -1,0 +1,40 @@
+{
+  "name": "qdrant-managed-cloud-quickstart",
+  "product_area": "cloud",
+  "skill_url": "https://skills.qdrant.tech/qdrant-managed-cloud-quickstart/SKILL.md",
+  "prompt": "We prototyped on local Docker and just moved to a free Qdrant Cloud cluster so we can show a demo to a customer in about five weeks. Two things broke: our Python client gets 401s using the key I created under Access Management in the Cloud Console, and once a teammate got connected, a filtered search on our `category` field that worked fine locally now returns an error. If the demo goes well we'll move to a 3-node production setup. What are we doing wrong, and what should we set up now so the move to production is smooth?",
+  "rubric": [
+    {
+      "type": "must",
+      "text": "Identifies that the key from Access Management is a Cloud Management Key for the Cloud platform API, not the database, and says to create a Database API key from the cluster's API Keys section and send it on every request (api-key header or the SDK's api_key parameter)"
+    },
+    {
+      "type": "must",
+      "text": "Explains that new Cloud collections run in strict mode, which rejects filtering on a payload field without an index, and fixes it by creating a payload index on `category` rather than disabling strict mode"
+    },
+    {
+      "type": "must",
+      "text": "Warns that free clusters are suspended after 1 week without use and deleted after 4 weeks unless reactivated, so a demo five weeks out is at risk unless the cluster is kept active, reactivated, or moved to a Standard cluster"
+    },
+    {
+      "type": "must",
+      "text": "For the 3-node production move, recommends high availability: at least 3 nodes with a replication factor of at least 2"
+    },
+    {
+      "type": "bonus",
+      "text": "Recommends creating collections with enough shards to spread across the nodes (at least as many as nodes, ideally about twice)"
+    },
+    {
+      "type": "bonus",
+      "text": "Recommends configuring a backup schedule on the Standard cluster, noting free clusters have no automatic backups"
+    },
+    {
+      "type": "avoid",
+      "text": "Recommends disabling strict mode or setting unindexed filtering to allowed as the fix for the filter error"
+    },
+    {
+      "type": "avoid",
+      "text": "Tells the user to keep using the Cloud Management Key and only change how it is passed (header name, Bearer prefix, port)"
+    }
+  ]
+}
