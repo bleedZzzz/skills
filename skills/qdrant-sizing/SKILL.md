@@ -24,7 +24,9 @@ Use when: someone asks how much RAM or disk they need, how much data should be k
 - Read [Calculating RAM and Disk Size](https://skills.qdrant.tech/md/documentation/capacity-planning/?s=calculating-ram-and-disk-size) and compute each component with its formula. Do not estimate from memory: the formulas and defaults change between versions.
 - Size each component separately: dense vectors, quantized vectors, HNSW indexes, sparse vectors and their indexes, payload, payload indexes, and the ID tracker. Every component scales with `base = points × replication_factor`.
 - For multiple named vectors or payload fields per point, size each one separately, then sum them.
-- Count quantized vectors on top of the originals: Qdrant stores the compressed copy alongside the original vectors, not instead of them.
+- Count quantized vectors on top of the originals: Qdrant stores the compressed copy alongside the original vectors, not instead of them. A TurboQuant vector datatype is different: it replaces the originals, at 2 bytes per dimension for `turbo16` (1.20+), 1 for `turbo8` (1.20+), and 0.5 for `turbo4` (1.19+), against 4 for `float32`. Dense vectors can have 1 to 65,536 dimensions.
+- A full-text index with `scoring: true` (BM25, 1.20+) stores document lengths and token positions, so it needs more RAM and disk than a filter-only full-text index.
+- A per-element payload index (the `nested` option for arrays of objects, 1.20+) also keeps an element-to-point map in RAM regardless of its memory tier: budget about 4 bytes per point for each such index.
 - Count payload indexes only for fields used for filtering; index only fields that are frequently filtered on.
 
 ### Decide what needs to be loaded in RAM
@@ -35,6 +37,8 @@ On Qdrant 1.19 or newer, set this per structure with `memory: pinned`, `cached`,
 **Recommendations:**
 
 - Keep HNSW, inverted indexes for sparse vectors, and payload indexes in RAM for faster search.
+- On Qdrant 1.20 or newer the ID tracker has its own memory tier (`pinned` by default, so it counts toward RAM). `cached` lets the OS evict it, and `cold` needs no up-front RAM.
+- With inline storage on 1.20 or newer, the original vectors live only in the HNSW index file, and `hnsw_config.memory` sets their tier, not `vectors.memory`. Quantized vectors follow it too unless their `memory` is set explicitly.
 - Pin quantized vectors in RAM if they fit comfortably in the available memory, and move the original vectors to `cold` for rescoring. This is the main way quantization reduces RAM.
 - If your use case involves splitting vectors into multiple collections or subgroups based on payload values (for example, serving searches for multiple users, each with their own subset of vectors), store vectors in the `cold` memory tier and size RAM from the active subset of points, not the full collection [Subgroup-oriented configuration](https://skills.qdrant.tech/md/documentation/capacity-planning/?s=subgroup-oriented-configuration).
 - With vectors on disk, the amount of RAM drives latency: keeping half as many vectors in RAM roughly doubles search latency [Storage-focused configuration](https://skills.qdrant.tech/md/documentation/capacity-planning/?s=storage-focused-configuration).
