@@ -22,7 +22,7 @@
     },
     {
       "type": "bonus",
-      "text": "Recommends creating collections with enough shards to spread across the nodes (at least as many as nodes, ideally about twice)"
+      "text": "Recommends creating collections with enough shards to spread across the nodes (at least twice as many shards as nodes)"
     },
     {
       "type": "bonus",
