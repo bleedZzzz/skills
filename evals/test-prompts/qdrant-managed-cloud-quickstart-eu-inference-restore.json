@@ -1,0 +1,40 @@
+{
+  "name": "qdrant-managed-cloud-quickstart-eu-inference-restore",
+  "product_area": "cloud",
+  "skill_url": "https://skills.qdrant.tech/qdrant-managed-cloud-quickstart/SKILL.md",
+  "prompt": "We run a Standard Qdrant Cloud cluster in Frankfurt for a customer-support search app, and our contracts require that ticket text stays in the EU. We have two things planned this week. First, we're replacing our own embedding service with Cloud Inference using all-MiniLM-L6-v2, since it's free. Second, a bad deploy yesterday overwrote payloads on a lot of points, so tonight we're restoring our last good backup into the production cluster. That backup is from last week; since then we've scaled the cluster from 1 to 3 nodes and upgraded the Qdrant version. Can you walk me through how to do both?",
+  "rubric": [
+    {
+      "type": "must",
+      "text": "Warns that free Cloud Inference models such as all-MiniLM-L6-v2 run in the US even for EU-region clusters, so the ticket text would leave the EU, which breaks their contractual requirement"
+    },
+    {
+      "type": "must",
+      "text": "Gives a compliant alternative for embeddings: a paid Qdrant-hosted model (which runs in the EU for EU-region clusters), embedding the text themselves before upload, or an external provider through Cloud Inference only if that provider guarantees EU processing"
+    },
+    {
+      "type": "must",
+      "text": "Explains that restoring a backup into the same cluster also resets its CPU, memory, node count, and Qdrant version to what they were when the backup was taken, so the cluster would go back to 1 node and the older version"
+    },
+    {
+      "type": "must",
+      "text": "Recommends restoring into a new cluster instead of the production cluster, or at minimum makes the configuration reset and the downtime an explicit, accepted trade-off"
+    },
+    {
+      "type": "must",
+      "text": "Notes that the cluster is unavailable during a restore into the same cluster"
+    },
+    {
+      "type": "bonus",
+      "text": "Notes that any data written after the backup was taken is lost on restore, so writes since last week need to be re-applied or recovered"
+    },
+    {
+      "type": "avoid",
+      "text": "States or implies that Cloud Inference keeps all embedding traffic in the cluster's own region, including for free models"
+    },
+    {
+      "type": "avoid",
+      "text": "Endorses restoring into the production cluster without mentioning that its node count and Qdrant version will be reset"
+    }
+  ]
+}
