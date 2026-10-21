@@ -45,6 +45,7 @@ skills/
   qdrant-deployment-options/
   qdrant-edge/
   qdrant-hybrid-cloud-setup/
+  qdrant-managed-cloud-quickstart/
   qdrant-migration-tool/
   qdrant-model-migration/
   qdrant-multitenancy/
