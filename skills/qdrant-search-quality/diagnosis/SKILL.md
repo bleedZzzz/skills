@@ -31,7 +31,7 @@ Use when: results are irrelevant or missing expected matches and you need to iso
 - Check if filters are too restrictive (then you might need to use ACORN)
 - If duplicate results from chunked documents, use Grouping API to deduplicate [Grouping](https://skills.qdrant.tech/md/documentation/search/search/?s=grouping-api)
 
-Payload filtering and sparse vector search are different things. Metadata (dates, categories, tags) goes in payload for filtering. Text content goes in sparse vectors for search.
+Payload filtering and ranked text search are different things. Metadata (dates, categories, tags) goes in payload for filtering. To rank text content, on Qdrant 1.20 or newer use BM25 on a full-text index with `scoring` enabled (queried with a `text` query); on older versions, or for learned sparse models, use sparse vectors. A full-text index without `scoring` only filters.
 
 ## Approximate Search Worse Than Exact
 
@@ -72,4 +72,4 @@ Use when: exact search also returns bad results and model choice is confirmed by
 - Skip payload indexes on filtered fields then blame quality (HNSW can't traverse filtered-out nodes, and filterable HNSW is built only if payload indexes were set up prior)
 - Deploy without baseline recall or other search relevance metrics (no way to measure regressions)
 - Compare two configs on a query set too small to resolve the difference between them (the result is noise, not evidence)
-- Confuse payload filtering with sparse vector search (different things, different config)
+- Confuse payload filtering with ranked text search (different things, different config)

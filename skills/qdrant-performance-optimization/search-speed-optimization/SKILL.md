@@ -49,7 +49,8 @@ Use when: filtered search is significantly slower than unfiltered. Most common S
 - Create payload index on the filtered field [Payload index](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=payload-index)
 - Use `is_tenant=true` for primary filtering condition: [Tenant index](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=tenant-index)
 - Try ACORN algorithm for complex filters: [ACORN](https://skills.qdrant.tech/md/documentation/search/search/?s=acorn-search-algorithm)
-- Avoid using `nested` filtering conditions as a primary filter. It might force qdrant to read raw payload values instead of using index.
+- `nested` filter conditions check each remaining candidate's payload element by element, which is slow when many candidates remain. On Qdrant 1.20 or newer, create per-element indexes (the `nested` parameter of the payload index) on every field the nested filter uses, so Qdrant answers it from the indexes without reading payload [Per-element index](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=per-element-index-for-arrays-of-objects).
+- Substring match (`match` with `substring`, 1.20+) is expensive: it checks every distinct value of the field, and Qdrant rejects it whenever strict mode is enabled (the Qdrant Cloud default). Prefer prefix match (keyword index with `prefix: true`) or full-text match where the use case allows. A keyword index, especially with `prefix`, speeds it up; a full-text index doesn't help [Substring match](https://skills.qdrant.tech/md/documentation/search/filtering/?s=substring-match)
 - If payload index was added after HNSW build, trigger re-index to create filterable subgraph links
 
 

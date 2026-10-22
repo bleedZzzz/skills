@@ -18,6 +18,7 @@ You MUST re-embed if: changing model provider (OpenAI to Cohere), changing archi
 
 You do NOT need to re-embed existing dense vectors if:
 
+- Adding BM25 for hybrid search on v1.20+: no vectors to generate. Create a `text` payload index with `scoring` enabled on the payload field; Qdrant builds it from the stored payload [BM25 scoring](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=bm25-scoring)
 - Adding sparse vectors for hybrid search: generate only the sparse vectors. On v1.18+, add the sparse field to the existing collection and backfill it with `UpdateVectors`. On v1.17 or earlier, copy the dense vectors into the new collection instead of recomputing them [Update vectors](https://skills.qdrant.tech/md/documentation/manage-data/points/?s=update-vectors)
 - Using Matryoshka models: use the `dimensions` parameter to output lower-dimensional embeddings (some recall loss, good for 100M+ datasets)
 - Changing quantization (binary to scalar): Qdrant re-quantizes automatically [Quantization](https://skills.qdrant.tech/md/documentation/manage-data/quantization/)
@@ -73,6 +74,9 @@ If you anticipate future model migrations, define both vector fields upfront at 
 
 Use when: adding sparse/BM25 vectors to an existing dense-only collection. Most common migration pattern.
 
+- If the cluster is v1.20 or later and the text is in the payload, prefer BM25 on a full-text index over sparse vectors: create a `text` index with `scoring` enabled (plus the language's stemmer and stopwords) on the text field and add a `text` query prefetch next to the dense one. It needs no schema change, no vector backfill, and no `avg_len`, and works on a collection of any age. Re-indexing a large collection can take a while [BM25 on a full-text index](https://skills.qdrant.tech/md/documentation/search/text-search/full-text-search/?s=bm25)
+- Use the sparse vector options below on v1.19 or earlier, or when the text isn't stored in the payload.
+
 - If the cluster is v1.18 or later, add the sparse vector field directly, even if the dense vector is unnamed [Update vector schema](https://skills.qdrant.tech/md/documentation/manage-data/collections/?s=update-vector-schema)
   - Generate sparse vectors for existing points and backfill with `UpdateVectors`; existing dense vectors stay as they are [Update vectors](https://skills.qdrant.tech/md/documentation/manage-data/points/?s=update-vectors)
 
@@ -82,7 +86,7 @@ Use when: adding sparse/BM25 vectors to an existing dense-only collection. Most 
   - Scroll the old collection with `with_vectors=True` to copy the dense vectors, and generate only the sparse vectors
   - Migrate payloads, swap alias
 
-Sparse vectors at chunk level have different TF-IDF characteristics than document level. Test retrieval quality after migration, especially for non-English text without stop-word removal.
+Sparse vectors and full-text BM25 statistics at chunk level have different TF-IDF characteristics than document level. Test retrieval quality after migration, especially for non-English text without stop-word removal.
 
 
 ## Re-embedding Is Too Slow
