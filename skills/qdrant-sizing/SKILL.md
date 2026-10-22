@@ -25,7 +25,7 @@ Use when: someone asks how much RAM or disk they need, how much data should be k
 - Size each component separately: dense vectors, quantized vectors, HNSW indexes, sparse vectors and their indexes, payload, payload indexes, and the ID tracker. Every component scales with `base = points × replication_factor`.
 - For multiple named vectors or payload fields per point, size each one separately, then sum them.
 - Count quantized vectors on top of the originals: Qdrant stores the compressed copy alongside the original vectors, not instead of them. A TurboQuant vector datatype is different: it replaces the originals, at 2 bytes per dimension for `turbo16` (1.20+), 1 for `turbo8` (1.20+), and 0.5 for `turbo4` (1.19+), against 4 for `float32`. Dense vectors can have 1 to 65,536 dimensions.
-- A full-text index with `scoring: true` (BM25, 1.20+) stores document lengths and token positions, so it needs more RAM and disk than a filter-only full-text index.
+- A full-text index with `scoring` enabled (BM25, 1.20+) stores document lengths and token positions, so it needs more RAM and disk than a filter-only full-text index.
 - A per-element payload index (the `nested` option for arrays of objects, 1.20+) also keeps an element-to-point map in RAM regardless of its memory tier: budget about 4 bytes per point for each such index.
 - Count payload indexes only for fields used for filtering; index only fields that are frequently filtered on.
 

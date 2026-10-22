@@ -31,7 +31,7 @@ Use when: results are irrelevant or missing expected matches and you need to iso
 - Check if filters are too restrictive (then you might need to use ACORN)
 - If duplicate results from chunked documents, use Grouping API to deduplicate [Grouping](https://skills.qdrant.tech/md/documentation/search/search/?s=grouping-api)
 
-Payload filtering and ranked text search are different things. Metadata (dates, categories, tags) goes in payload for filtering. To rank text content, on Qdrant 1.20 or newer use BM25 on a full-text index with `scoring: true` (queried with a `text` query); on older versions, or for learned sparse models, use sparse vectors. A full-text index without `scoring` only filters.
+Payload filtering and ranked text search are different things. Metadata (dates, categories, tags) goes in payload for filtering. To rank text content, on Qdrant 1.20 or newer use BM25 on a full-text index with `scoring` enabled (queried with a `text` query); on older versions, or for learned sparse models, use sparse vectors. A full-text index without `scoring` only filters.
 
 ## Approximate Search Worse Than Exact
 
