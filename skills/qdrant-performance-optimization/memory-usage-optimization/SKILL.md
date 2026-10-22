@@ -41,7 +41,7 @@ There are some scenarios, however, when it can be a good option:
 
 - Deployments with low latency disks - local NVMe or similar.
 - Multi-tenant deployments, where only a subset of tenants is frequently accessed, so that only a fraction of data & index is loaded in RAM at a time.
-- For deployments with [inline storage](https://skills.qdrant.tech/md/documentation/ops-optimization/optimize/?s=inline-storage-in-hnsw-index) enabled. On Qdrant 1.20 or newer, inline storage keeps the original vectors only in the HNSW index file, so `hnsw_config.memory` decides their tier and `vectors.memory` is ignored for those segments. Quantized vectors follow `hnsw_config.memory` unless quantization has its own explicit `memory`, so set it explicitly (for example `pinned`) when the HNSW index is `cold` or `cached` [Where Qdrant stores the vectors](https://skills.qdrant.tech/md/documentation/ops-optimization/optimize/?s=where-qdrant-stores-the-vectors).
+- For deployments with [inline storage](https://skills.qdrant.tech/md/documentation/ops-optimization/optimize/?s=inline-storage-in-hnsw-index) enabled. On Qdrant 1.20 or newer, inline storage keeps the original vectors only in the HNSW index file, so `hnsw_config.memory` decides their tier and `vectors.memory` is ignored for those segments. Unless quantization has its own explicit `memory`, quantized vectors are `cold` when the HNSW index is `cold` and `pinned` in any other tier, so set it explicitly (for example `pinned`) if the index is `cold` but you want the quantized vectors in RAM [Inline storage](https://skills.qdrant.tech/md/documentation/ops-configuration/memory-tiers/?s=inline-storage).
 
 
 ## How to minimize memory footprint
