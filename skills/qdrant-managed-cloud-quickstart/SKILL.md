@@ -54,7 +54,7 @@ Use when: the user wants Qdrant to create embeddings (Cloud Inference) instead o
 Use when: moving from a prototype to something users or other services depend on.
 
 - Set a backup schedule (Standard clusters only). Restoring into the same cluster also rolls back its CPU, memory, node count, and Qdrant version, and the cluster is unavailable during the restore. You can restore into a new cluster instead [Backups](https://skills.qdrant.tech/md/documentation/cloud/backups/?s=restore-a-backup)
-- Adding nodes doesn't change a collection's replication factor. After moving to more nodes, check each existing collection and set its replication factor to 2 or more; on Cloud, its shards are then replicated or dropped automatically to match [Replication](https://skills.qdrant.tech/md/documentation/scaling/distributed_deployment/?s=replication)
+- Adding nodes doesn't change a collection's replication factor. After moving to more nodes, check each existing collection and set its replication factor to 2 or more; on Cloud, its shards are then replicated or dropped automatically to match, so change only the collection config and don't add or drop replicas yourself; see the [horizontal scaling skill](../qdrant-scaling/scaling-data-volume/horizontal-scaling/SKILL.md) [Replication](https://skills.qdrant.tech/md/documentation/scaling/distributed_deployment/?s=replication)
 - Create collections with at least twice as many shards as nodes so they can spread as the cluster grows; see the [horizontal scaling skill](../qdrant-scaling/scaling-data-volume/horizontal-scaling/SKILL.md) [Production-ready cluster](https://skills.qdrant.tech/md/documentation/cloud/create-cluster/?s=creating-a-production-ready-cluster)
 - Cloud caps a cluster at 1000 collections. For many tenants, use the [multitenancy skill](../qdrant-multitenancy/SKILL.md) instead of a collection per tenant [Multitenancy](https://skills.qdrant.tech/md/documentation/manage-data/multitenancy/)
 - Before upgrading the cluster's Qdrant version, follow the [version upgrade skill](../qdrant-version-upgrade/SKILL.md)
@@ -67,3 +67,4 @@ Use when: moving from a prototype to something users or other services depend on
 - Restore a backup into the live cluster without expecting its size and version to roll back
 - Send EU-resident text to a free inference model, which runs in the US
 - Remove a user without revoking the API keys they created
+- Drop or move replicas by hand after changing a collection's replication factor; the cluster manager does it, and manual calls race with it
