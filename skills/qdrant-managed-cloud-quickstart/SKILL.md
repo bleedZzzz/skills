@@ -67,4 +67,4 @@ Use when: moving from a prototype to something users or other services depend on
 - Restore a backup into the live cluster without expecting its size and version to roll back
 - Send EU-resident text to a free inference model, which runs in the US
 - Remove a user without revoking the API keys they created
-- Drop or move replicas by hand after changing a collection's replication factor; the cluster manager does it, and manual calls race with it
+- Drop or move replicas by hand after changing a collection's replication factor; the Cloud platform does it, and manual calls race with it
