@@ -45,10 +45,10 @@ In this case:
 
 - Upgrade to provisioned IOPS or local NVMe first. See impact of disk performance to vector search in [Disk performance article](https://skills.qdrant.tech/md/articles/memory-consumption/)
 - Use `io_uring` on Linux (kernel 5.11+) [io_uring article](https://skills.qdrant.tech/md/articles/io_uring/)
-- Use `datatype: turbo4` to store vectors in 4-bit on-disk representation (8× smaller), drastically reducing disk reads [turbo4](https://skills.qdrant.tech/md/documentation/manage-data/vectors/?s=turbo4)
+- Use `datatype: turbo4` to store vectors in 4-bit on-disk representation (8x smaller), drastically reducing disk reads [turbo4](https://skills.qdrant.tech/md/documentation/manage-data/vectors/?s=turbo4)
 - In case of quantized vectors, prefer global rescoring over per-segment rescoring to reduce disk reads. Example in the [tutorial](https://skills.qdrant.tech/md/documentation/tutorials-operations/large-scale-search/?s=search-query)
 - Configure higher number of search threads to parallelize disk reads. Default is `cpu_count - 1`, which is optimal for RAM-based search but may be too low for disk-based search. See [configuration reference](https://skills.qdrant.tech/md/documentation/ops-configuration/configuration/?s=configuration-options)
-- Use slow request log (v1.17+) to identify which queries are bottlenecked on disk [Slow request log](https://skills.qdrant.tech/md/documentation/ops-monitoring/slow-request-log/)
+- Use the slow request log (v1.16+, always on, per node) to find which queries are slowest, then check `process_major_page_faults_total` in `/metrics` to confirm I/O is the bottleneck [Slow request log](https://skills.qdrant.tech/md/documentation/ops-monitoring/slow-request-log/) [Node metrics](https://skills.qdrant.tech/md/documentation/ops-monitoring/monitoring/?s=node-metrics-metrics)
 - If still saturated, scale out horizontally (each node adds independent IOPS)
 
 

@@ -22,13 +22,8 @@ Do not answer from this page alone: it contains routing only, not the guidance. 
 | Memory keeps growing in production | `debugging/SKILL.md` |
 | Requests are slow and I need to find out why | `debugging/SKILL.md` |
 | Is Qdrant healthy right now | `debugging/SKILL.md` |
-| Want to enable slow request log or find slow queries | `debugging/SKILL.md` |
+| Want to find which queries are slow (slow request log) | `debugging/SKILL.md` |
 | Need a per-collection memory or vector breakdown | `debugging/SKILL.md` |
 
 Qdrant monitoring tracks performance and health, and catches issues before they become outages. See the metric reference before tuning anything:
 [Monitoring docs](https://skills.qdrant.tech/md/documentation/ops-monitoring/monitoring/)
-
-Additional monitoring resources:
-- Slow Request Log (v1.17+) surfaces individual slow queries with timing breakdown [Slow request log](https://skills.qdrant.tech/md/documentation/ops-monitoring/slow-request-log/)
-- Memory Usage breakdown per collection [Memory usage](https://skills.qdrant.tech/md/documentation/ops-monitoring/memory-usage/)
-- `/telemetry` endpoint provides per-collection details (point counts, vector configs, segment state)

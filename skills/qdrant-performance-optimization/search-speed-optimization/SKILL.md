@@ -19,7 +19,7 @@ Use when: individual queries take too long regardless of load.
 
 ### Diagnostic steps:
 
-- Enable slow request log (v1.17+) to surface queries exceeding a threshold [Slow request log](https://skills.qdrant.tech/md/documentation/ops-monitoring/slow-request-log/)
+- Read the slow request log (v1.16+, always on, per node) to find the slowest unique operations over 50 ms [Slow request log](https://skills.qdrant.tech/md/documentation/ops-monitoring/slow-request-log/)
 - Check if second run of the same request is significantly faster (indicates memory pressure)
 - Try the same query with `with_payload: false` and `with_vectors: false` to see if payload retrieval is the bottleneck
 - If request uses filters, try to remove them one by one to identify if a specific filter condition is the bottleneck

@@ -23,7 +23,7 @@ The most common hybrid search pattern is dense + sparse → RRF fusion. For this
 Based on what you've picked, test your approach:
 1. Configure Qdrant collection with [named vectors](https://skills.qdrant.tech/md/documentation/manage-data/vectors/?s=named-vectors), where each named vector usually corresponds to one representation (different embedding models or different vector types) of a data point.
 2. Construct a hybrid search request with Query API from your building blocks. You can search independently among one type of vectors, with `prefetch` + `using`, like shown in examples in [Hybrid Queries documentation](https://skills.qdrant.tech/md/documentation/search/hybrid-queries).
-3. Size prefetch `limit` generously — each prefetch must return enough candidates for the outer fusion to work. A prefetch `limit` of 20–100 is typical when the final `limit` is 10. Undersized prefetch limits silently degrade result quality.
+3. Size prefetch `limit` generously -- each prefetch must return enough candidates for the outer fusion to work. A prefetch `limit` of 20-100 is typical when the final `limit` is 10. Undersized prefetch limits silently degrade result quality.
 4. Evaluate hybrid search quality on real user data and provide user with improvements and tradeoffs (speed/resources).
 
 ## How Isolated Are Parallel Searches?
@@ -32,7 +32,7 @@ Use when: different tenants share one collection and you need to understand hybr
 
 If user wants to isolate/share hybrid search pipelines between tenants, consider that:
 
-- Indexes (sparse, payload and dense) and [IDF modifier](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=idf-modifier) for sparse vectors are computed independently **per shard**, not per **tenant**, by default — payload-based tenant partitioning alone does not isolate IDF statistics. On Qdrant 1.19 or newer, pass `idf: { scope: "filter" }` as a search param to scope IDF statistics to only documents matching the query filter. This requires a payload index on the filtered field (e.g. `tenant_id`). See [Per-tenant IDF statistics](https://skills.qdrant.tech/md/documentation/manage-data/multitenancy/?s=per-tenant-idf-statistics).
+- Indexes (sparse, payload and dense) and [IDF modifier](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=idf-modifier) for sparse vectors are computed independently **per shard**, not per **tenant**, by default. Payload-based tenant partitioning alone does not isolate IDF statistics. On Qdrant 1.19 or newer, set `params.idf.corpus` to a payload filter (e.g. `group_id` = tenant) so IDF is computed over that tenant's documents only. The corpus filter is separate from the retrieval filter and is usually broader. Index the corpus field. If the corpus filter matches nothing, ranking degrades to plain TF. [Per-tenant IDF statistics](https://skills.qdrant.tech/md/documentation/manage-data/multitenancy/?s=per-tenant-idf-statistics).
 - Prefetch runs independently per shard to retrieve #limit results, so for collection-level prefetches if collection has several shards, Qdrant will always prefetch under the hood #limit * #shard results. Final results are merged based on scores.
 - In nested prefetches (deeper than 1 level), methods described in "Combining Searches" might be done on a shard level first, then per-shards results once again will be merged based on scores.
 
@@ -41,4 +41,4 @@ If user wants to isolate/share hybrid search pipelines between tenants, consider
 - Choose a hybrid search pattern based on "vibes" without any [hybrid search quality evaluation](https://skills.qdrant.tech/md/documentation/search-tuning/hybrid-search/?s=measure-whether-it-helps) in-place.
 - Create too many named vectors without a need. An unfilled named vector might take as much resources as a filled one.
 - Set prefetch `limit` too low (e.g. equal to outer `limit`). The fusion step needs a surplus of candidates to produce good results.
-- Apply `score_threshold` on an outer fusion query expecting it to filter by individual prefetch scores — it filters by the fused score only.
+- Apply `score_threshold` on an outer fusion query expecting it to filter by individual prefetch scores -- it filters by the fused score only.
