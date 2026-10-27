@@ -48,7 +48,7 @@ Better alternatives: over-provision shards initially, or spin up new cluster wit
 - Do not jump to horizontal before exhausting vertical (adds complexity for no gain)
 - Do not set `shard_number` that isn't a multiple of node count (uneven distribution)
 - Do not use `replication_factor: 1` in production if you need fault tolerance
-- Do not drop or move replicas by hand on Qdrant Cloud after changing `replication_factor`; the cluster manager does it, and manual calls race with it
+- Do not drop or move replicas by hand on Qdrant Cloud after changing `replication_factor`; the Cloud platform does it, and manual calls race with it
 - Do not add nodes to a self-hosted cluster without rebalancing shards (use the shard move API to redistribute); Qdrant Cloud rebalances shards automatically [Cluster scaling](https://skills.qdrant.tech/md/documentation/cloud/cluster-scaling/)
 - Do not scale down RAM without load testing (cache eviction causes days-long latency incidents)
 - Do not hit the collection limit by using one collection per tenant (use payload partitioning)
