@@ -5,7 +5,7 @@ description: "Diagnoses and fixes slow Qdrant indexing and data ingestion. Use w
 
 # What to Do When Qdrant Indexing Is Too Slow
 
-Qdrant does NOT build HNSW indexes immediately. Small segments use brute-force until they exceed `indexing_threshold_kb` (default: 20 MB). Search during this window is slower by design, not a bug.
+Qdrant does NOT build HNSW indexes immediately. Small segments use brute-force until they exceed `indexing_threshold_kb` (default: 10000 KB, about 10 MB). Search during this window is slower by design, not a bug.
 
 - Understand the indexing optimizer [Indexing optimizer](https://skills.qdrant.tech/md/documentation/ops-optimization/optimizer/?s=indexing-optimizer)
 
@@ -24,13 +24,6 @@ For server-side, optimize Qdrant configuration and indexing strategy:
 
 - Create more shards (3-12), each shard has an independent update worker [Sharding](https://skills.qdrant.tech/md/documentation/scaling/distributed_deployment/?s=sharding)
 - Create payload indexes before HNSW builds (needed for filterable vector index) [Payload index](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=payload-index)
-
-Suitable for initial bulk load of large datasets:
-
-- Disable HNSW during bulk load (set `indexing_threshold_kb` very high, restore after) [Collection params](https://skills.qdrant.tech/md/documentation/manage-data/collections/?s=update-collection-parameters)
-- Setting `m=0` to disable HNSW is legacy, use high `indexing_threshold_kb` instead
-
-Careful, fast unindexed upload might temporarily use more RAM and degrade search performance until optimizer catches up.
 
 See [Bulk upload documentation](https://skills.qdrant.tech/md/documentation/manage-data/bulk-upload/)
 

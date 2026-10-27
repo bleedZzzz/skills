@@ -6,7 +6,7 @@
   "rubric": [
     {
       "type": "must",
-      "text": "Estimates RAM usage via num_vectors * dimensions * 4 bytes * 1.5 (or the quantized equivalent) and concludes the 4.3M x 3072-dim vectors are pushing close to the limits of 16GB RAM"
+      "text": "Estimates RAM per component, in particular the int8 quantized vectors kept in RAM by always_ram (4.3M x 3072 x 1 byte, about 13 GB) plus the ID tracker and payload indexes, and concludes this is pushing close to the limits of 16GB RAM"
     },
     {
       "type": "must",

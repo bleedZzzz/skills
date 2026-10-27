@@ -22,7 +22,7 @@
     },
     {
       "type": "bonus",
-      "text": "Mentions named vectors must be configured at collection creation (can't be added later)"
+      "text": "Mentions that named vectors are set at collection creation, or added to an existing collection on Qdrant 1.18 or newer"
     },
     {
       "type": "bonus",

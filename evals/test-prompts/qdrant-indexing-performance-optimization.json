@@ -14,10 +14,6 @@
     },
     {
       "type": "must",
-      "text": "Recommends disabling HNSW during the bulk load (raise indexing_threshold_kb, restore after) to speed the initial load"
-    },
-    {
-      "type": "must",
       "text": "Flags the payload-index timing problem: create payload indexes BEFORE the HNSW build, not 'as fields become available' after - adding them after HNSW breaks/forces rebuild of the filterable vector index"
     },
     {

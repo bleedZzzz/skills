@@ -39,7 +39,7 @@ Use when: configuring Kubernetes health checks.
 
 Use when: setting up alerts for production or Hybrid Cloud deployments.
 
-- Hybrid Cloud provides ~11 pre-configured Prometheus alerts out of the box [Cloud cluster monitoring](https://skills.qdrant.tech/md/documentation/cloud/cluster-monitoring/)
+- Qdrant Cloud provides pre-configured email alerts for 11 cluster issues. Use scraped metrics when you need custom alerts or routing to other targets. See [Cloud cluster monitoring](https://skills.qdrant.tech/md/documentation/cloud/cluster-monitoring/)
 - Use AlertmanagerConfig to route alerts to Slack, PagerDuty, or other targets based on labels
 - At minimum, alert on: optimizer errors, node not ready, replication factor below target, disk usage >80%
 
@@ -50,7 +50,7 @@ Use when: enterprise compliance requires centralized logs or audit trails.
 
 - Enable JSON log format for structured analysis: set `logger.format` to `json` in config [Configuration](https://skills.qdrant.tech/md/documentation/ops-configuration/configuration/)
 - Use FluentD/OpenSearch for log aggregation
-- Audit logs (v1.17+) write to local filesystem (`/qdrant/storage/audit/`), not stdout. Mount a Persistent Volume and deploy a sidecar container to tail these files to stdout so DaemonSets can pick them up. [Audit logging](https://skills.qdrant.tech/md/documentation/security/?s=audit-logging)
+- Audit logs (v1.17+) write to local filesystem (`/qdrant/storage/audit/`) by default. On v1.20 or newer, set `audit.output` to `stdout`, `stderr`, `file_and_stdout`, or `file_and_stderr` (env var `QDRANT__AUDIT__OUTPUT`) so a DaemonSet can collect them with no sidecar or Persistent Volume. Each line carries `"kind": "audit"` to tell it from regular logs, and the `/audit/logs` API returns nothing on a node that writes only to a stream. On v1.19 or older, mount a Persistent Volume and deploy a sidecar container to tail the files to stdout. [Audit logging](https://skills.qdrant.tech/md/documentation/security/?s=audit-log-output)
 
 
 ## What NOT to Do

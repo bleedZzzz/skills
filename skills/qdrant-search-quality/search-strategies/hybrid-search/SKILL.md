@@ -1,6 +1,6 @@
 ---
 name: qdrant-hybrid-search
-description: "Explains hybrid search in Qdrant. Use when someone asks 'how do I setup hybrid search?', 'how to combine keyword and semantic search?', 'sparse plus dense vectors?', 'missing keyword matches', 'how to combine results from multiple searches?' and 'combining multiple representations'. Also use for how a hybrid query is scoped: 'how is IDF scoped?', 'can one tenant's data contaminate another tenant's scoring?'"
+description: "Explains hybrid search in Qdrant. Use when someone asks 'how do I setup hybrid search?', 'how to combine keyword and semantic search?', 'sparse plus dense vectors?', 'missing keyword matches', 'how to combine results from multiple searches?' and 'combining multiple representations'. Also use for how a hybrid query is scoped: 'how is IDF scoped?', 'can one tenant's data contaminate another tenant's scoring?'. Also 'BM25 on a text index or sparse vectors?'"
 allowed-tools:
   - Read
   - Grep
@@ -16,7 +16,7 @@ Prefetches can be nested and searches can be multi-stage, all pipeline happening
 
 Identify the user's problem and pick building blocks:
 - What can go into one prefetch, e.g. power one search, in [Search Types](search-types/SKILL.md)
-- How to combine results of these searches (RRF, DBSF, FormulaQuery, reranking) in [Combining Searches](combining-searches/SKILL.md)
+- How to combine results of these searches and tune the fusion (RRF, DBSF, FormulaQuery, reranking) in [Combining Searches](combining-searches/SKILL.md)
 
 The most common hybrid search pattern is dense + sparse → RRF fusion. For this: create a collection with two named vectors (one dense, one sparse), construct a Query API request with two prefetches (one per vector type using `using`), and fuse with RRF as the outer query. See [Hybrid Queries documentation](https://skills.qdrant.tech/md/documentation/search/hybrid-queries).
 
@@ -32,7 +32,7 @@ Use when: different tenants share one collection and you need to understand hybr
 
 If user wants to isolate/share hybrid search pipelines between tenants, consider that:
 
-- Indexes (sparse, payload and dense) and [IDF modifier](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=idf-modifier) for sparse vectors are computed independently **per shard**, not per **tenant**, by default. Payload-based tenant partitioning alone does not isolate IDF statistics. On Qdrant 1.19 or newer, set `params.idf.corpus` to a payload filter (e.g. `group_id` = tenant) so IDF is computed over that tenant's documents only. The corpus filter is separate from the retrieval filter and is usually broader. Index the corpus field. If the corpus filter matches nothing, ranking degrades to plain TF. [Per-tenant IDF statistics](https://skills.qdrant.tech/md/documentation/manage-data/multitenancy/?s=per-tenant-idf-statistics).
+- Indexes (sparse, payload and dense) and [IDF modifier](https://skills.qdrant.tech/md/documentation/manage-data/indexing/?s=idf-modifier) for sparse vectors are computed independently **per shard**, not per **tenant**, by default. Payload-based tenant partitioning alone does not isolate IDF statistics. On Qdrant 1.19 or newer, set `params.idf.corpus` to a payload filter (e.g. `group_id` = tenant) so IDF is computed over that tenant's documents only. The corpus filter is separate from the retrieval filter and is usually broader. Index the corpus field. If the corpus filter matches nothing, ranking degrades to plain TF. On 1.20 or newer it applies to BM25 `text` queries on a full-text index too, where it scopes the average document length as well [Per-tenant scoring statistics](https://skills.qdrant.tech/md/documentation/manage-data/multitenancy/?s=per-tenant-scoring-statistics).
 - Prefetch runs independently per shard to retrieve #limit results, so for collection-level prefetches if collection has several shards, Qdrant will always prefetch under the hood #limit * #shard results. Final results are merged based on scores.
 - In nested prefetches (deeper than 1 level), methods described in "Combining Searches" might be done on a shard level first, then per-shards results once again will be merged based on scores.
 

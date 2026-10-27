@@ -32,6 +32,7 @@ Use when: you need full control over infrastructure or custom configuration, and
 Use when: you want managed infrastructure with zero-downtime updates, automatic backups, and resharding without operating clusters yourself — including when data-residency or compliance rules mean the data can't sit on Qdrant-operated infrastructure.
 
 - Qdrant Cloud handles upgrades, scaling, backups, and monitoring [Qdrant Cloud](https://skills.qdrant.tech/md/documentation/cloud-quickstart/)
+- Chose Qdrant Cloud? See the [Managed Cloud quickstart skill](../qdrant-managed-cloud-quickstart/SKILL.md) to create and connect your first cluster.
 - Hybrid Cloud: the same managed control plane, deployed on your own infrastructure/VPC. Use this when data residency or compliance requirements rule out Qdrant Cloud but you still don't want to operate clusters yourself [Hybrid Cloud](https://skills.qdrant.tech/md/documentation/hybrid-cloud/)
 - Supports multi-version upgrades automatically
 - Provides features not available in self-hosted: `/sys_metrics`, managed resharding, pre-configured alerts
@@ -44,7 +45,7 @@ Use when: network round-trip to a server is unacceptable. Edge devices, in-proce
 - Qdrant EDGE: in-process bindings to Qdrant shard-level functions, no network overhead [Qdrant EDGE](https://skills.qdrant.tech/md/documentation/edge/edge-quickstart/)
 - Same data format as server. Can sync with server via shard snapshots.
 - Single-node feature set only. No distributed mode.
-- Chose EDGE and want to build on it? See the `qdrant-edge` skill (BM25, snapshot sync, app-side fusion).
+- Chose EDGE and want to build on it? See the `qdrant-edge` skill (BM25, snapshot sync, hybrid queries).
 
 
 ## What NOT to Do

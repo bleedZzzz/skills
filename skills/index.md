@@ -2,6 +2,11 @@
 
 Agent skills encoding deep Qdrant knowledge for coding agents.
 
+## Start with search
+
+For specific tasks, symptoms, or troubleshooting questions, start with the [skills search](https://skills.qdrant.tech/search?query=your+query+here).
+
+Use hierarchical navigation when exploring an area broadly.
 ## Qdrant Advisor
 
 - [qdrant-advisor](../meta/qdrant-advisor/SKILL.md) — Meta-skill that loads the relevant Qdrant skill live at trigger time, so you install one skill instead of the full set and always get current guidance. Ships no static content of its own.
@@ -12,6 +17,7 @@ Agent skills encoding deep Qdrant knowledge for coding agents.
 - [qdrant-deployment-options](qdrant-deployment-options/SKILL.md) — Choosing between local, Docker, self-hosted, Cloud, and embedded deployments.
 - [qdrant-edge](qdrant-edge/SKILL.md) — Building on the embedded in-process shard: server sync, on-device BM25, snapshots, and what to reuse versus implement.
 - [qdrant-hybrid-cloud-setup](qdrant-hybrid-cloud-setup/SKILL.md) — Setting up a Hybrid Cloud environment: cluster prerequisites, storage/CSI, agent connectivity, exposure, and common pitfalls.
+- [qdrant-managed-cloud-quickstart](qdrant-managed-cloud-quickstart/SKILL.md) — Getting a first Managed Cloud cluster running and connected: free vs standard, API keys, strict mode, Cloud Inference, and choices you can't undo.
 - [qdrant-migration-tool](qdrant-migration-tool/SKILL.md) — Using the Qdrant Migration Tool CLI to move data from another vector database into Qdrant.
 - [qdrant-model-migration](qdrant-model-migration/SKILL.md) — Switching embedding models without downtime.
 - [qdrant-monitoring](qdrant-monitoring/SKILL.md) — Monitoring, observability, health checks, and debugging production issues.

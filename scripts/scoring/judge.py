@@ -64,7 +64,35 @@ def score_item(item_type: str, verdict: str) -> tuple[float, float, bool]:
 # --- final-answer extraction ------------------------------------------------
 
 
+def _run_agent(run_dir: Path) -> str:
+    """Read metadata.json's "agent" field. Defaults to "claude" if absent --
+    covers pre-multi-agent runs (no field at all), a missing/corrupt
+    metadata.json, and a metadata.json that parses but isn't a JSON object
+    (e.g. "[]") -- so old or malformed captured runs keep grading exactly as
+    before instead of raising."""
+    md = run_dir / "metadata.json"
+    if not md.exists():
+        return "claude"
+    try:
+        data = json.loads(md.read_text())
+    except json.JSONDecodeError:
+        return "claude"
+    if not isinstance(data, dict):
+        return "claude"
+    return data.get("agent") or "claude"
+
+
 def extract_final_answer(run_dir: Path) -> str:
+    """Pull the final answer for a run. Dispatches on metadata.json's "agent"
+    field, since claude and codex runs carry the final answer in completely
+    different places (the stream-json result event's `.result`, vs. a plain
+    final.txt file) -- see the agent-specific helpers below."""
+    if _run_agent(run_dir) == "codex":
+        return _extract_codex_final_answer(run_dir)
+    return _extract_claude_final_answer(run_dir)
+
+
+def _extract_claude_final_answer(run_dir: Path) -> str:
     """Pull the final assistant message from a stream-json stdout.txt.
 
     Prefers the terminal `result` event's `.result` (the CLI's canonical final
@@ -95,6 +123,43 @@ def extract_final_answer(run_dir: Path) -> str:
                     last_assistant = block.get("text", "") or last_assistant
     answer = result_text.strip() or last_assistant.strip()
     return answer
+
+
+def _extract_codex_final_answer(run_dir: Path) -> str:
+    """Pull the final answer from a Codex run.
+
+    Prefers final.txt, written by `-o/--output-last-message` -- already the
+    clean final answer, no event-stream parsing needed. Falls back to the
+    last `agent_message` item in stdout.txt's --json event stream if
+    final.txt is missing or empty (e.g. a run that crashed before Codex wrote
+    it, or a login failure whose reduced metadata.json has no final.txt at
+    all)."""
+    final_txt = run_dir / "final.txt"
+    if final_txt.exists():
+        text = final_txt.read_text(errors="replace").strip()
+        if text:
+            return text
+
+    stdout = run_dir / "stdout.txt"
+    if not stdout.exists():
+        raise FileNotFoundError(f"no final.txt or stdout.txt in {run_dir}")
+
+    last_message = ""
+    for line in stdout.read_text(errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            ev = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(ev, dict):
+            continue
+        if ev.get("type") == "item.completed":
+            item = ev.get("item")
+            if isinstance(item, dict) and item.get("type") == "agent_message":
+                last_message = item.get("text", "") or last_message
+    return last_message.strip()
 
 
 # --- grading prompt ---------------------------------------------------------
